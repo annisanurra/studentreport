@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --ink:#5F2A79; --ink-soft:#8E6BB8; --paper:#F4F1F8; --card:#FFFFFF;
+    --sage:#af9ec4; --sage-line:#C9D3C2; --gold:#D4A24C; --gold-light:#F3E6C9;
+    --clay:#B15C3E; --clay-light:#F2DED3;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:840px;margin:0 auto;padding:48px 32px 80px;}
+  #state-msg{font-size:14px;color:var(--ink-soft);padding:40px 0;text-align:center;}
+
+  .masthead{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--ink);padding-bottom:20px;margin-bottom:32px;gap:20px;}
+  .id-header{display:flex;align-items:center;gap:16px;}
+  .avatar{width:64px;height:64px;border-radius:50%;background:var(--sage);object-fit:cover;flex:none;}
+  .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 6px;}
+  .masthead h1{font-family:'Fraunces',serif;font-weight:600;font-size:30px;margin:0;letter-spacing:-.01em;}
+  .masthead .meta{text-align:right;font-size:13px;color:var(--ink-soft);line-height:1.6;flex:none;}
+
+  section{margin-bottom:44px;}
+  h2.section-title{font-family:'Fraunces',serif;font-weight:500;font-size:20px;margin:0 0 18px;display:flex;align-items:baseline;gap:10px;}
+  h2.section-title .num{font-size:13px;color:var(--gold);font-weight:600;border:1px solid var(--gold);border-radius:999px;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;flex:none;}
+
+  .overall{background:var(--ink);color:var(--paper);border-radius:10px;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+  .overall .label{font-size:13px;letter-spacing:.06em;text-transform:uppercase;opacity:.75;}
+  .overall .value{font-family:'Fraunces',serif;font-size:32px;font-weight:600;}
+
+  .task-row{display:grid;grid-template-columns:1fr 96px 52px;gap:16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--sage-line);}
+  .task-row:last-child{border-bottom:none;}
+  .task-name{font-size:14px;font-weight:500;}
+  .task-note{grid-column:1 / -1;font-size:12.5px;color:var(--ink-soft);margin-top:-4px;}
+  .ruler{height:8px;background:var(--sage);border-radius:2px;overflow:hidden;}
+  .ruler-fill{height:100%;background:var(--gold);border-radius:2px;}
+  .task-pct{font-size:14px;font-weight:600;text-align:right;}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+  .chart-box{background:var(--card);border:1px solid var(--sage-line);border-radius:12px;padding:16px;}
+
+  .sikap-row{display:flex;align-items:center;gap:16px;padding:10px 0;border-bottom:1px solid var(--sage-line);}
+  .sikap-row:last-child{border-bottom:none;}
+  .sikap-label{width:150px;font-size:14px;font-weight:500;flex:none;}
+  .dots{display:flex;gap:5px;flex:none;}
+  .dot{width:11px;height:11px;border-radius:50%;background:var(--sage);}
+  .dot.filled{background:var(--gold);}
+  .sikap-note{font-size:12.5px;color:var(--ink-soft);}
+
+  .feedback-box{background:var(--gold-light);border-radius:10px;padding:20px 24px;font-family:'Fraunces',serif;font-size:16px;line-height:1.6;color:#5C4415;}
+  .feedback-date{font-family:'Inter',sans-serif;font-size:11.5px;color:#7A5A1E;margin-top:10px;}
+
+  .badge-row{display:flex;gap:12px;flex-wrap:wrap;}
+  .badge-card{background:var(--card);border:1px solid var(--sage-line);border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;width:104px;text-align:center;}
+  .badge-icon{width:40px;height:40px;border-radius:50%;background:var(--gold-light);object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .badge-icon img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
+  .badge-name{font-size:11.5px;font-weight:600;color:#6f4a8e;line-height:1.3;}
+
+  .project-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .project-card{background:var(--card);border:1px solid var(--sage-line);border-radius:12px;overflow:hidden;text-decoration:none;color:inherit;display:block;transition:border-color .15s ease;}
+  .project-card:hover{border-color:var(--gold);}
+  .project-thumb{width:100%;aspect-ratio:16/10;background:var(--sage);object-fit:cover;display:block;}
+  .project-body{padding:14px 16px;}
+  .project-title{font-size:14.5px;font-weight:600;margin:0 0 4px;}
+  .project-desc{font-size:12.5px;color:var(--ink-soft);margin:0 0 8px;line-height:1.5;}
+  .project-link{font-size:12px;color:var(--gold);font-weight:600;}
+
+  footer{border-top:1px solid var(--sage-line);padding-top:18px;font-size:12px;color:var(--ink-soft);display:flex;justify-content:space-between;}
+
+  @media(max-width:560px){
+    .two-col,.skill-grid,.project-grid{grid-template-columns:1fr;}
+    .masthead{flex-direction:column;align-items:flex-start;}
+    .masthead .meta{text-align:left;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+  <div id="state-msg">Memuat data siswa...</div>
+</div>
+
+<script>
+// ====== KONFIGURASI ======
+// Tempel URL Web App dari Google Apps Script di sini (hasil Deploy > Web app)
+const API_URL = "https://script.google.com/macros/s/AKfycbwoXPYiy6RlkVCBrQOh_tHp16-reTiTi6MNOdKRJW0VSACx0g4xkB2iX5IZpmL4hdv5/exec"; 
+
+// Data contoh dipakai kalau API_URL belum diisi, supaya halaman tetap bisa dilihat
+const SAMPLE_DATA = {
+  student: { StudentID:"ST001", Name:"Aditya Pratama", Class:"5A", Level:"Python Beginner", PhotoURL:"", MentorName:"Bu Rina", StartDate:"2026-01-10" },
+  tasks: [
+    { Task:"Variables", Score:1.00, Note:"Menguasai konsep dasar" },
+    { Task:"Loops", Score:0.85, Note:"Masih bingung nested loop" },
+    { Task:"Functions", Score:0.90, Note:"Baik" }
+  ],
+  skills: [
+    { Skill:"Problem Solving", Value:5 },
+    { Skill:"Coding", Value:4 },
+    { Skill:"Logic", Value:5 },
+    { Skill:"Creativity", Value:4 }
+  ],
+  attitude: [
+    { Aspect:"Discipline", Rating:4, Note:"Selalu hadir tepat waktu" },
+    { Aspect:"Communication", Rating:4, Note:"Aktif bertanya" }
+  ],
+  projects: [
+    { Project:"Kalkulator Sederhana", ImageURL:"", Link:"https://scratch.mit.edu/contoh-1", Description:"Kalkulator dasar 4 operasi" }
+  ],
+  badges: [ { Badge:"Fast Learner", IconURL:"" }, { Badge:"Perfect Attendance", IconURL:"" } ],
+  teacherNotes: [ { Date:"2026-06-20", Feedback:"Excellent improvement in Python. Keep practicing loops and functions." } ]
+};
+
+const params = new URLSearchParams(window.location.search);
+const studentId = params.get("id");
+
+async function loadData(){
+  if(!API_URL){
+    render(SAMPLE_DATA, true);
+    return;
+  }
+  if(!studentId){
+    document.getElementById("state-msg").textContent = "Tambahkan ?id=STUDENTID di URL, contoh: report.html?id=ST001";
+    return;
+  }
+  try{
+    const res = await fetch(`${API_URL}?id=${encodeURIComponent(studentId)}`);
+    const data = await res.json();
+    if(data.error){
+      document.getElementById("state-msg").textContent = data.error;
+      return;
+    }
+    render(data, false);
+  }catch(err){
+    document.getElementById("state-msg").textContent = "Gagal memuat data. Cek API_URL sudah benar dan Web App sudah di-deploy dengan akses 'Anyone'.";
+  }
+}
+
+function pct(v){ return Math.round((Number(v)||0)*100); }
+function ratingDots(rating, max=5){
+  let html = "";
+  for(let i=1;i<=max;i++) html += `<span class="dot${i<=rating?" filled":""}"></span>`;
+  return html;
+}
+
+// Ubah link Google Drive biasa (share link) jadi link gambar yang bisa langsung tampil di web.
+// Mendukung format:
+//   https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+//   https://drive.google.com/open?id=FILE_ID
+// Link non-Drive (Imgur, dsb) dibiarkan apa adanya.
+function toDirectImageUrl(url){
+  if(!url) return "";
+  const fileMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+  if(fileMatch) return `https://drive.google.com/uc?export=view&id=${fileMatch[1]}`;
+  const openMatch = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+  if(openMatch) return `https://drive.google.com/uc?export=view&id=${openMatch[1]}`;
+  return url;
+}
+
+function render(data, isSample){
+  const s = data.student;
+  const tasks = data.tasks || [];
+  const skills = data.skills || [];
+  const attitude = data.attitude || [];
+  const projects = data.projects || [];
+  const badges = data.badges || [];
+  const notes = data.teacherNotes || [];
+
+  const avgProgress = tasks.length ? Math.round(tasks.reduce((a,t)=>a+(Number(t.Score)||0),0)/tasks.length*100) : 0;
+
+  const taskRows = tasks.map(t => `
+    <div class="task-row">
+      <div class="task-name">${t.Task}</div>
+      <div class="ruler"><div class="ruler-fill" style="width:${pct(t.Score)}%"></div></div>
+      <div class="task-pct">${pct(t.Score)}%</div>
+      ${t.Note ? `<div class="task-note">${t.Note}</div>` : ""}
+    </div>`).join("");
+
+  const attitudeRows = attitude.map(a => `
+    <div class="sikap-row">
+      <span class="sikap-label">${a.Aspect}</span>
+      <span class="dots">${ratingDots(a.Rating)}</span>
+      <span class="sikap-note">${a.Note || ""}</span>
+    </div>`).join("");
+
+  const badgeRow = badges.map(b => `
+    <div class="badge-card">
+      <div class="badge-icon">${b.IconURL ? `<img src="${toDirectImageUrl(b.IconURL)}" alt="${b.Badge}">` : "🏅"}</div>
+      <div class="badge-name">${b.Badge}</div>
+    </div>`).join("");
+
+  const projectCards = projects.map(p => `
+    <a class="project-card" href="${p.Link || '#'}" target="_blank" rel="noopener">
+      ${p.ImageURL ? `<img class="project-thumb" src="${toDirectImageUrl(p.ImageURL)}" alt="${p.Project}">` : `<div class="project-thumb"></div>`}
+      <div class="project-body">
+        <p class="project-title">${p.Project}</p>
+        <p class="project-desc">${p.Description || ""}</p>
+        <span class="project-link">Lihat project ↗</span>
+      </div>
+    </a>`).join("");
+
+  const feedback = notes[notes.length-1];
+
+  document.getElementById("wrap").innerHTML = `
+    ${isSample ? `<div style="background:var(--clay-light);color:#8A452D;font-size:12.5px;padding:10px 16px;border-radius:8px;margin-bottom:24px;">Menampilkan data contoh — isi API_URL di kode untuk menghubungkan ke Google Sheets Anda.</div>` : ""}
+    <div class="masthead">
+      <div class="id-header">
+        ${s.PhotoURL ? `<img class="avatar" src="${toDirectImageUrl(s.PhotoURL)}" alt="${s.Name}">` : `<div class="avatar"></div>`}
+        <div>
+          <p class="eyebrow">Student report — ${s.Level || ""}</p>
+          <h1>${s.Name}</h1>
+        </div>
+      </div>
+      <div class="meta">Kelas ${s.Class || "-"}<br>Mentor: ${s.MentorName || "-"}</div>
+    </div>
+
+    <div class="overall">
+      <span class="label">Overall progress</span>
+      <span class="value">${avgProgress}%</span>
+    </div>
+
+    <section>
+      <h2 class="section-title"><span class="num">1</span>Task progress</h2>
+      ${taskRows || `<p style="font-size:13px;color:var(--ink-soft);">Belum ada data tugas.</p>`}
+    </section>
+
+    <section class="two-col">
+      <div>
+        <h2 class="section-title"><span class="num">2</span>Skill</h2>
+        <div class="chart-box">
+          ${skills.length ? `<canvas id="radarChart" height="220"></canvas>` : `<p style="font-size:13px;color:var(--ink-soft);margin:0;">Belum ada data skill untuk siswa ini.</p>`}
+        </div>
+      </div>
+      <div>
+        <h2 class="section-title"><span class="num">3</span>Sikap</h2>
+        ${attitudeRows || `<p style="font-size:13px;color:var(--ink-soft);">Belum ada data sikap.</p>`}
+      </div>
+    </section>
+
+    ${feedback ? `
+    <section>
+      <h2 class="section-title"><span class="num">4</span>Teacher feedback</h2>
+      <div class="feedback-box">
+        “${feedback.Feedback}”
+        <div class="feedback-date">${feedback.Date || ""}</div>
+      </div>
+    </section>` : ""}
+
+    ${badges.length ? `
+    <section>
+      <h2 class="section-title"><span class="num">5</span>Achievement</h2>
+      <div class="badge-row">${badgeRow}</div>
+    </section>` : ""}
+
+    <section>
+      <h2 class="section-title"><span class="num">6</span>Project</h2>
+      <div class="project-grid">${projectCards || `<p style="font-size:13px;color:var(--ink-soft);">Belum ada project.</p>`}</div>
+    </section>
+
+    <footer>
+      <span>Student report</span>
+      <span>StudentID: ${s.StudentID}</span>
+    </footer>
+  `;
+
+  if(skills.length){
+    if(window.Chart){
+      const ctx = document.getElementById("radarChart");
+      new Chart(ctx, {
+        type: "radar",
+        data: {
+          labels: skills.map(sk => sk.Skill),
+          datasets: [{
+            data: skills.map(sk => Number(sk.Value)||0),
+            backgroundColor: "rgba(212,162,76,0.20)",
+            borderColor: "#D4A24C",
+            pointBackgroundColor: "#D4A24C",
+            borderWidth: 2
+          }]
+        },
+        options: {
+          plugins: { legend: { display:false } },
+          scales: { r: { min:0, max:5, ticks:{ stepSize:1, showLabelBackdrop:false, color:"#8E6BB8", font:{size:10} }, grid:{ color:"#C9D3C2" }, angleLines:{ color:"#C9D3C2" }, pointLabels:{ color:"#5F2A79", font:{size:12} } } }
+        }
+      });
+    } else {
+      document.querySelector(".chart-box").innerHTML = `<p style="font-size:13px;color:var(--clay);margin:0;">Chart.js gagal dimuat (cek koneksi internet / domain cdnjs.cloudflare.com tidak diblokir).</p>`;
+    }
+  }
+}
+
+loadData();
+</script>
+</body>
+</html>
